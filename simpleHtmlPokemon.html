@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Pokemon App</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+#pokemon-search {
+    margin: 20px;
+    text-align: center;
+}
+
+#pokemon-name {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.dropdown-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.dropdown {
+    flex: 1; /* Each dropdown takes up equal space */
+}
+
+select {
+    width: 90%; /* Width of the dropdown */
+    padding: 5px 10px;
+    margin: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+#left-dropdown {
+    text-align: right; /* Aligns the dropdown to the right */
+}
+
+#right-dropdown {
+    text-align: left; /* Aligns the dropdown to the left */
+}
+
+#pokemon-battle {
+    display: none; /* Initially hidden */
+    border: 2px solid black; /* Border separating the two sides */
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.pokemon-info {
+    width: 45%;
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* This will push the moves to the bottom */
+    height: 100%;
+}
+.pokemon-info img {
+    width: 200px; /* Fixed width */
+    height: 200px; /* Fixed height */
+    object-fit: contain; /* Maintain aspect ratio */
+    margin: 0 auto; /* Center the image */
+}
+
+.pokemon-info ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.pokemon-info li {
+    background-color: #f2f2f2;
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.pokemon-details {
+    text-align: center;
+    /* Additional styling as needed... */
+}
+
+.pokemon-info ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.pokemon-info li {
+    background-color: #f2f2f2;
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer; /* Changes the cursor to a pointer */
+    transition: background-color 0.3s ease; /* Smooth transition for the background color */
+}
+
+.pokemon-info li:hover {
+    background-color: #e0e0e0; /* Highlight color on hover */
+}
+
+.health-bar-container {
+    width: 100%;
+    background-color: #ddd; /* Background of the health bar */
+    border-radius: 5px;
+    overflow: hidden; /* Ensures the inner bar does not exceed the container's radius */
+}
+
+.health-bar {
+    height: 20px;
+    background-color: green; /* Color of the health bar */
+    width: 100%; /* Initially full health */
+    transition: width 0.3s ease; /* Smooth transition for health decrease */
+}
+
+.health-points {
+    margin-left: 10px;
+}
+
+.turn-message {
+    text-align: center;
+    font-size: 20px;
+    margin: 20px 0;
+    color: #333;
+}
+
+@keyframes slideDownDisappear {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+}
+
+.pokemon-fade-out {
+    animation: slideDownDisappear 1s ease forwards;
+}
+
+#resetButtonContainer {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#effectiveMessage {
+    display: flex;
+    justify-content: center;
+    font-size: 18px;
+}
+    </style>
+
+</head>
+<body>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            <div class="dropdown-container">
+                <div class="dropdown" id="left-dropdown">
+                    <select id="pokemon1"></select>
+                </div>
+                <div class="dropdown" id="right-dropdown">
+                    <select id="pokemon2"></select>
+                </div>
+                <div class="button-container">
+                    <button id="fight-button">Fight!</button>
+                    <button id="random-button">Random</button>
+                </div>
+            
+            </div>
+            
+            <div id="pokemon-battle" style="display:none">
+                <div id="pokemon-left" class="pokemon-info">
+                    <div class="pokemon-details"></div>
+                    <div class="health-bar-container">
+                        <div class="health-bar"></div>
+                        <span class="health-points"></span>
+                    </div>
+                    <div class="pokemon-moves"></div>
+                </div>
+                <div id="pokemon-right" class="pokemon-info">
+                    <div class="pokemon-details"></div>
+                    <div class="health-bar-container">
+                        <div class="health-bar"></div>
+                        <span class="health-points"></span>
+                    </div>
+                    <div class="pokemon-moves"></div>
+                </div>
+            </div>
+            <div id="turn-message" class="turn-message"></div>
+            
+            <div id="pokemon-container"></div>
+            <div id="resetButtonContainer" style="display: none;"><button id="resetButton">Play again!</button></div>
+            <div id="effectiveMessage"></div>
+            
+        </main>
+    </div>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// for details on configuring this project to bundle and minify static web assets.
+
+// Write your JavaScript code.
+
+
+let pokemon1InitialHealth = 0, pokemon1CurrentHealth = 0;
+let pokemon2InitialHealth = 0, pokemon2CurrentHealth = 0;
+let pokemon1Data, pokemon2Data;
+let isTyping = false;
+let pokemon1AttackModifier = 1.0; // Starts at 1.0, meaning no modification initially
+let pokemon2AttackModifier = 1.0;
+let pokemon1AccuracyModifier = 1.0;
+let pokemon2AccuracyModifier = 1.0;
+
+const typeEffectiveness = {
+    "normal": {
+        "normal": 1,
+            "fire": 1,
+                "water": 1,
+                    "electric": 1,
+                        "grass": 1,
+                            "ice": 1,
+                                "fighting": 1,
+                                    "poison": 1,
+                                        "ground": 1,
+                                            "flying": 1,
+                                                "psychic": 1,
+                                                    "bug": 1,
+                                                        "rock": 0.5,
+                                                            "ghost": 0,
+                                                                "dragon": 1,
+                                                                    "dark": 1,
+                                                                        "steel": 0.5
+    },
+    "fire": {
+        "normal": 1,
+            "fire": 0.5,
+                "water": 0.5,
+                    "electric": 1,
+                        "grass": 2,
+                            "ice": 2,
+                                "fighting": 1,
+                                    "poison": 1,
+                                        "ground": 1,
+                                            "flying": 1,
+                                                "psychic": 1,
+                                                    "bug": 2,
+                                                        "rock": 0.5,
+                                                            "ghost": 1,
+                                                                "dragon": 0.5,
+                                                                    "dark": 1,
+                                                                        "steel": 2
+    },
+    "water": {
+        "normal": 1,
+            "fire": 2,
+                "water": 0.5,
+                    "electric": 1,
+                        "grass": 0.5,
+                            "ice": 1,
+                                "fighting": 1,
+                                    "poison": 1,
+                                        "ground": 2,
+                                            "flying": 1,
+                                                "psychic": 1,
+                                                    "bug": 1,
+                                                        "rock": 2,
+                                                            "ghost": 1,
+                                                                "dragon": 0.5,
+                                                                    "dark": 1,
+                                                                        "steel": 1
+    },
+    "electric": {
+        "normal": 1,
+            "fire": 1,
+                "water": 2,
+                    "electric": 0.5,
+                        "grass": 0.5,
+                            "ice": 1,
+                                "fighting": 1,
+                                    "poison": 1,
+                                        "ground": 0,
+                                            "flying": 2,
+                                                "psychic": 1,
+                                                    "bug": 1,
+                                                        "rock": 1,
+                                                            "ghost": 1,
+                                                                "dragon": 0.5,
+                                                                    "dark": 1,
+                                                                        "steel": 1
+    },
+    "grass": {
+        "normal": 1,
+            "fire": 0.5,
+                "water": 2,
+                    "electric": 1,
+                        "grass": 0.5,
+                            "ice": 1,
+                                "fighting": 1,
+                                    "poison": 0.5,
+                                        "ground": 2,
+                                            "flying": 0.5,
+                                                "psychic": 1,
+                                                    "bug": 0.5,
+                                                        "rock": 2,
+                                                            "ghost": 1,
+                                                                "dragon": 0.5,
+                                                                    "dark": 1,
+                                                                        "steel": 0.5
+    },
+    "ice": {
+        "normal": 1,
+            "fire": 0.5,
+                "water": 0.5,
+                    "electric": 1,
+                        "grass": 2,
+                            "ice": 0.5,
+                                "fighting": 1,
+                                    "poison": 1,
+                                        "ground": 2,
+                                            "flying": 2,
+                                                "psychic": 1,
+                                                    "bug": 1,
+                                                        "rock": 1,
+                                                            "ghost": 1,
+                                                                "dragon": 2,
+                                                                    "dark": 1,
+                                                                        "steel": 0.5
+    },
+    "fighting": {
+        "normal": 2,
+            "fire": 1,
+                "water": 1,
+                    "electric": 1,
+                        "grass": 1,
+                            "ice": 2,
+                                "fighting": 1,
+                                    "poison": 0.5,
+                                        "ground": 1,
+                                            "flying": 0.5,
+                                                "psychic": 0.5,
+                                                    "bug": 0.5,
+                                                        "rock": 2,
+                                                            "ghost": 0,
+                                                                "dragon": 1,
+                                                                    "dark": 2,
+                                                                        "steel": 2
+    },
+    "poison": {
+        "normal": 1,
+            "fire": 1,
+                "water": 1,
+                    "electric": 1,
+                        "grass": 2,
+                            "ice": 1,
+                                "fighting": 1,
+                                    "poison": 0.5,
+                                        "ground": 0.5,
+                                            "flying": 1,
+                                                "psychic": 1,
+                                                    "bug": 1,
+                                                        "rock": 0.5,
+                                                            "ghost": 0.5,
+                                                                "dragon": 1,
+                                                                    "dark": 1,
+                                                                        "steel": 0
+    },
+    "ground": {
+        "normal": 1,
+            "fire": 2,
+                "water": 1,
+                    "electric": 2,
+                        "grass": 0.5,
+                            "ice": 1,
+                                "fighting": 1,
+                                    "poison": 2,
+                                        "ground": 1,
+                                            "flying": 0,
+                                                "psychic": 1,
+                                                    "bug": 0.5,
+                                                        "rock": 2,
+                                                            "ghost": 1,
+                                                                "dragon": 1,
+                                                                    "dark": 1,
+                                                                        "steel": 2
+    },
+    "flying": {
+        "normal": 1,
+            "fire": 1,
+                "water": 1,
+                    "electric": 0.5,
+                        "grass": 2,
+                            "ice": 1,
+                                "fighting": 2,
+                                    "poison": 1,
+                                        "ground": 1,
+                                            "flying": 1,
+                                                "psychic": 1,
+                                                    "bug": 2,
+                                                        "rock": 0.5,
+                                                            "ghost": 1,
+                                                                "dragon": 1,
+                                                                    "dark": 1,
+                                                                        "steel": 0.5
+    },
+    "psychic": {
+        "normal": 1,
+            "fire": 1,
+                "water": 1,
+                    "electric": 1,
+                        "grass": 1,
+                            "ice": 1,
+                                "fighting": 2,
+                                    "poison": 2,
+                                        "ground": 1,
+                                            "flying": 1,
+                                                "psychic": 0.5,
+                                                    "bug": 1,
+                                                        "rock": 1,
+                                                            "ghost": 1,
+                                                                "dragon": 1,
+                                                                    "dark": 0,
+                                                                        "steel": 0.5
+    },
+    "bug": {
+        "normal": 1,
+            "fire": 0.5,
+                "water": 1,
+                    "electric": 1,
+                        "grass": 2,
+                            "ice": 1,
+                                "fighting": 0.5,
+                                    "poison": 0.5,
+                                        "ground": 1,
+                                            "flying": 0.5,
+                                                "psychic": 2,
+                                                    "bug": 1,
+                                                        "rock": 1,
+                                                            "ghost": 0.5,
+                                                                "dragon": 1,
+                                                                    "dark": 2,
+                                                                        "steel": 0.5
+    },
+    "rock": {
+        "normal": 1,
+            "fire": 2,
+                "water": 1,
+                    "electric": 1,
+                        "grass": 1,
+                            "ice": 2,
+                                "fighting": 0.5,
+                                    "poison": 1,
+                                        "ground": 0.5,
+                                            "flying": 2,
+                                                "psychic": 1,
+                                                    "bug": 2,
+                                                        "rock": 1,
+                                                            "ghost": 1,
+                                                                "dragon": 1,
+                                                                    "dark": 1,
+                                                                        "steel": 0.5
+    },
+    "ghost": {
+        "normal": 0,
+            "fire": 1,
+                "water": 1,
+                    "electric": 1,
+                        "grass": 1,
+                            "ice": 1,
+                                "fighting": 1,
+                                    "poison": 1,
+                                        "ground": 1,
+                                            "flying": 1,
+                                                "psychic": 2,
+                                                    "bug": 1,
+                                                        "rock": 1,
+                                                            "ghost": 2,
+                                                                "dragon": 1,
+                                                                    "dark": 0.5,
+                                                                        "steel": 0.5
+    },
+    "dragon": {
+        "normal": 1,
+            "fire": 1,
+                "water": 1,
+                    "electric": 1,
+                        "grass": 1,
+                            "ice": 1,
+                                "fighting": 1,
+                                    "poison": 1,
+                                        "ground": 1,
+                                            "flying": 1,
+                                                "psychic": 1,
+                                                    "bug": 1,
+                                                        "rock": 1,
+                                                            "ghost": 1,
+                                                                "dragon": 2,
+                                                                    "dark": 1,
+                                                                        "steel": 0.5
+    },
+    "dark": {
+        "normal": 1,
+            "fire": 1,
+                "water": 1,
+                    "electric": 1,
+                        "grass": 1,
+                            "ice": 1,
+                                "fighting": 0.5,
+                                    "poison": 1,
+                                        "ground": 1,
+                                            "flying": 1,
+                                                "psychic": 2,
+                                                    "bug": 1,
+                                                        "rock": 1,
+                                                            "ghost": 2,
+                                                                "dragon": 1,
+                                                                    "dark": 0.5,
+                                                                        "steel": 0.5
+    },
+    "steel": {
+        "normal": 1,
+            "fire": 0.5,
+                "water": 0.5,
+                    "electric": 0.5,
+                        "grass": 1,
+                            "ice": 2,
+                                "fighting": 1,
+                                    "poison": 1,
+                                        "ground": 1,
+                                            "flying": 1,
+                                                "psychic": 1,
+                                                    "bug": 1,
+                                                        "rock": 2,
+                                                            "ghost": 1,
+                                                                "dragon": 1,
+                                                                    "dark": 1,
+                                                                        "steel": 0.5
+    }
+}
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    document.getElementById('resetButton').addEventListener('click', function () {
+        // Reload the current page
+        window.location.reload();
+    });
+});
+
+function populatePokemonDropdowns() {
+    fetch('https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/pokedex.php?pokedex=all')
+        .then(response => response.text())
+        .then(text => {
+            const pokemonList = text.split('\n');
+            const dropdown1 = document.getElementById('pokemon1');
+            const dropdown2 = document.getElementById('pokemon2');
+
+            pokemonList.forEach(pokemonEntry => {
+                const [fullName, shortName] = pokemonEntry.split(':');
+                const option1 = new Option(fullName, shortName);
+                const option2 = new Option(fullName, shortName);
+                dropdown1.add(option1);
+                dropdown2.add(option2);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Call the function to populate dropdowns
+populatePokemonDropdowns();
+
+function getRandomPokemon() {
+    const dropdown = document.getElementById('pokemon1'); // Assuming both dropdowns have the same options
+    const randomIndex = Math.floor(Math.random() * dropdown.options.length);
+    return dropdown.options[randomIndex].value;
+}
+
+function fetchAll() {
+    fetch('https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/pokedex.php?pokedex=all')
+        .then(response => response.text())
+        .then(text => {
+            const pokemonList = text.split('\n');
+            const container = document.getElementById('pokemon-container');
+
+            pokemonList.forEach(pokemonEntry => {
+                const [fullName, shortName] = pokemonEntry.split(':');
+                const imgUrl = `https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/sprites/${shortName}.png`;
+                const img = document.createElement('img');
+                img.src = imgUrl;
+                img.alt = fullName;
+                container.appendChild(img);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+fetchAll();
+
+
+function fetchAndDisplayPokemonData(pokemonName, elementId) {
+    const url = `https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/pokedex.php?pokemon=${pokemonName}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (elementId === 'pokemon-left') {
+                pokemon1Data = data;  // Save the entire data object
+                pokemon1InitialHealth = data.hp;
+                pokemon1CurrentHealth = data.hp;
+            } else if (elementId === 'pokemon-right') {
+                pokemon2Data = data;  // Save the entire data object
+                pokemon2InitialHealth = data.hp;
+                pokemon2CurrentHealth = data.hp;
+            }
+            console.log(data);
+            const detailsDiv = document.querySelector(`#${elementId} .pokemon-details`);
+            const movesDiv = document.querySelector(`#${elementId} .pokemon-moves`);
+            let movesHtml = '';
+
+            for (let i = 0; i < 4; i++) {
+                movesHtml += `<li>${data.moves[i] ? data.moves[i].name : '--'}</li>`;
+            }
+
+            detailsDiv.innerHTML = `
+                <h2>${data.name}</h2>
+                <img src="https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/${data.images.photo}" alt="${data.name}" />
+                <p>Type: ${data.info.type}</p>
+                <p>Weakness: ${data.info.weakness}</p>
+            `;
+
+            movesDiv.innerHTML = `<ul>${movesHtml}</ul>`;
+            if (elementId === 'pokemon-left') {
+                pokemon1InitialHealth = data.hp;
+                pokemon1CurrentHealth = data.hp;
+            } else if (elementId === 'pokemon-right') {
+                pokemon2InitialHealth = data.hp;
+                pokemon2CurrentHealth = data.hp;
+            }
+
+
+            // New code to add event listeners to the moves
+            const moves = movesDiv.querySelectorAll('li');
+            moves.forEach((move, index) => {
+                move.addEventListener('click', () => {
+                    const player = elementId === 'pokemon-left' ? 1 : 2;
+                    const moveName = move.textContent;
+                    onMoveSelected(player, moveName);
+                });
+            });
+            updateHealthDisplay(elementId, data.hp, data.hp);
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+document.getElementById('fight-button').addEventListener('click', function () {
+    // Hide dropdowns and fight button
+    document.querySelector('.dropdown-container').style.display = 'none';
+    document.querySelector('.button-container').style.display = 'none';
+    document.getElementById('pokemon-container').style.display = 'none';
+    document.getElementById('pokemon-battle').style.display = 'block';
+
+    // Get the selected Pokemon names
+    const pokemon1 = document.getElementById('pokemon1').value;
+    const pokemon2 = document.getElementById('pokemon2').value;
+
+    
+
+    // Show the battle UI
+    document.getElementById('pokemon-battle').style.display = 'flex';
+
+    // Fetch and display Pokemon data
+    fetchAndDisplayPokemonData(pokemon1, 'pokemon-left');
+    fetchAndDisplayPokemonData(pokemon2, 'pokemon-right');
+    updateTurnMessage(); // Call this when the game starts
+});
+
+document.getElementById('random-button').addEventListener('click', function () {
+    document.querySelector('.dropdown-container').style.display = 'none';
+    document.querySelector('.button-container').style.display = 'none';
+    document.getElementById('pokemon-container').style.display = 'none';
+    document.getElementById('pokemon-battle').style.display = 'block';
+
+    // Randomly select Pokémon for each player
+    const randomPokemon1 = getRandomPokemon();
+    const randomPokemon2 = getRandomPokemon();
+
+    // Show the battle UI
+    document.getElementById('pokemon-battle').style.display = 'flex';
+
+    // Fetch and display Pokémon data
+    fetchAndDisplayPokemonData(randomPokemon1, 'pokemon-left');
+    fetchAndDisplayPokemonData(randomPokemon2, 'pokemon-right');
+    updateTurnMessage(); // Call this when the game starts
+});
+
+function updateHealth(pokemonData, elementId) {
+    const totalHP = pokemonData.hp; // Assuming 'hp' is the total health points
+    const currentHP = totalHP; // Replace with the current health points logic
+
+    const healthBar = document.querySelector(`#${elementId} .health-bar`);
+    const healthPointsText = document.querySelector(`#${elementId} .health-points`);
+
+    const healthPercentage = (currentHP / totalHP) * 100;
+    healthBar.style.width = `${healthPercentage}%`;
+    healthPointsText.textContent = `${currentHP}/${totalHP}`;
+}
+
+let currentTurn = 1; // 1 for player 1's turn, 2 for player 2's turn
+
+function updateTurnMessage() {
+    const message = `It's Player ${currentTurn}'s turn!`;
+    document.getElementById('turn-message').textContent = message;
+}
+
+function switchTurn() {
+    currentTurn = currentTurn === 1 ? 2 : 1;
+    updateTurnMessage();
+}
+
+function typeOutText(text, elementId, interval = 50) { // interval set to 50ms for faster typing
+    const element = document.getElementById(elementId);
+    let i = 0;
+    element.textContent = ''; // Clear existing content
+
+    function type() {
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, interval);
+        }
+    }
+
+    type();
+}
+
+
+function onMoveSelected(player, moveName) {
+
+    if ((player === 1 && pokemon1CurrentHealth <= 0) || (player === 2 && pokemon2CurrentHealth <= 0)) {
+        alert("This Pokémon has fainted and cannot attack!");
+        return; // Exit the function early
+    }
+
+    if (player !== currentTurn) {
+        alert(`It's Player ${currentTurn}'s turn!`);
+        return;
+    }
+
+    const move = findMoveData(player, moveName);
+    console.log(move, 'move')
+    if (!move) {
+        console.error("Move not found");
+        return;
+    }
+
+     // Check if the move has damage points defined
+     let damage = move.dp || 0; // If move.dp is undefined, set damage to 0
+
+// Determine the effectiveness message
+let effectivenessMessage = "";
+if (damage === 0) {
+    effectivenessMessage = "No effect!";
+} else {
+    const damageMultiplier = getTypeEffectivenessMultiplier(move, player);
+    damage *= damageMultiplier; // Apply the multiplier only if there is damage
+
+    if (damageMultiplier === 0.5) {
+        effectivenessMessage = "It's Not Very Effective!";
+    } else if (damageMultiplier === 2) {
+        effectivenessMessage = "It's Super Effective!";
+    }
+}
+
+// Apply the move's damage points
+if (player === 1) {
+    pokemon2CurrentHealth -= damage; // Reduce Pokemon 2's health
+    updateHealthDisplay('pokemon-right', pokemon2CurrentHealth, pokemon2InitialHealth);
+} else {
+    pokemon1CurrentHealth -= damage; // Reduce Pokemon 1's health
+    updateHealthDisplay('pokemon-left', pokemon1CurrentHealth, pokemon1InitialHealth);
+}
+
+const effectiveMessageElement = document.getElementById('effectiveMessage');
+effectiveMessageElement.textContent = effectivenessMessage;
+
+    // Check for win condition
+    checkForWin();
+
+    // After the move, switch turns
+    switchTurn();
+}
+
+function typeOutText(text, elementId, callback, interval = 50) {
+    const element = document.getElementById(elementId);
+    let i = 0;
+    element.textContent = '';
+    isTyping = true;
+
+    function type() {
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, interval);
+        } else {
+            isTyping = false;
+            if (callback) callback();
+        }
+    }
+
+    type();
+}
+
+function findMoveData(player, moveName) {
+    let moves;
+    if (player === 1) {
+        moves = pokemon1Data ? pokemon1Data.moves : [];
+    } else {
+        moves = pokemon2Data ? pokemon2Data.moves : [];
+    }
+
+    return moves.find(move => move.name === moveName);
+}
+function updateHealthDisplay(elementId, currentHP, totalHP) {
+    const healthBar = document.querySelector(`#${elementId} .health-bar`);
+    const healthPointsText = document.querySelector(`#${elementId} .health-points`);
+
+    const healthPercentage = (currentHP / totalHP) * 100;
+    healthBar.style.width = `${healthPercentage}%`;
+    healthPointsText.textContent = `${currentHP}/${totalHP}`;
+}
+
+
+function getTypeEffectivenessMultiplier(move, player) {
+    const opponentType = player === 1 ? pokemon2Data.info.type : pokemon1Data.info.type;
+    const effectiveness = typeEffectiveness[move.type][opponentType];
+
+    if (effectiveness === undefined) {
+        console.error(`Effectiveness data not found for move type: ${move.type} against type: ${opponentType}`);
+        return 1; // default to 1 if no data is found
+    }
+
+    console.log(`Move Type: ${move.type}, Opponent Type: ${opponentType}, Effectiveness: ${effectiveness}`);
+    return effectiveness;
+}
+
+
+
+function checkForWin() {
+    let winner = null;
+
+    if (pokemon1CurrentHealth <= 0) {
+        winner = 'Player 2';
+        updateHealthDisplay('pokemon-left', 0, pokemon1InitialHealth)
+        document.querySelector('#pokemon-left .pokemon-details img').classList.add('pokemon-fade-out');
+    } else if (pokemon2CurrentHealth <= 0) {
+        winner = 'Player 1';
+        updateHealthDisplay('pokemon-right', 0, pokemon2InitialHealth)
+        document.querySelector('#pokemon-right .pokemon-details img').classList.add('pokemon-fade-out');
+    }
+
+    if (winner) {
+        alert(`${winner} wins the battle!`);
+        // Implement any additional logic for ending the game or starting a new round
+        document.getElementById("turn-message").style.display = 'none';
+        document.getElementById("resetButtonContainer").style.display = 'flex';
+
+    }
+}
+
+
+/*
+const moveElements = document.querySelectorAll('.pokemon-info li');
+
+moveElements.forEach((moveElement, index) => {
+    moveElement.addEventListener('click', () => {
+        console.log('clicked!')
+        const player = index < 4 ? 1 : 2; // Assuming first 4 moves belong to player 1 and next 4 to player 2
+        const moveName = moveElement.textContent;
+        onMoveSelected(player, moveName);
+    });
+});
+
+*/
+
+
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/pokemonBattleHub")
+    .configureLogging(signalR.LogLevel.Information)
+    .build();
+
+connection.on("ReceiveMove", function (move) {
+    // Logic to handle a move made by the opponent
+});
+
+connection.start()
+    .then(function () {
+        console.log("Connected to SignalR hub.");
+        // You can now join a game or listen for events
+    })
+    .catch(function (err) {
+        return console.error(err.toString());
+    });
+
+// Functions to join a game and make moves
+function joinGame(gameId) {
+    connection.invoke("JoinGame", gameId).catch(function (err) {
+        return console.error(err.toString());
+    });
+}
+
+function makeMove(gameId, move) {
+    connection.invoke("MakeMove", gameId, move).catch(function (err) {
+        return console.error(err.toString());
+    });
+}
+    </script>
+
+
+  
+</body>
+</html>
